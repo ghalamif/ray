@@ -12,7 +12,7 @@ from torchvision.models import resnet50
 
 # Define paths
 image_folder = 'visionline'
-labels_file_path = 'labels_optical_new.xlsx'
+labels_file_path = 'labels.xlsx'
 weights_path = 'resnet50-0676ba61.pth'
 
 # Ensure the weights file exists
@@ -72,8 +72,8 @@ model.load_state_dict(torch.load(weights_path))
 num_ftrs = model.fc.in_features
 model.fc = nn.Linear(num_ftrs, 1)
 
-# Move model to GPU if available
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+# Move model to GPU if available "turing"
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 model = model.to(device)
 
 # Define loss function and optimizer
