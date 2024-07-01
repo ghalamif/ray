@@ -20,12 +20,11 @@ class CustomDataset(Dataset):
     def __getitem__(self, index):
         img_name = self.annotations.iloc[index, 0]
         img_path = os.path.join(self.root_dir, img_name)
-        img_path = os.path.normpath(img_path)  # Normalize path to be OS compatible
+        img_path = os.path.normpath(img_path)  
         
-        print(f"Attempting to open image at path: {img_path}")  # Debug statement
-        
+      
         if not os.path.isfile(img_path):
-            print(f"File not found: {img_path}")  # Debug statement
+            print(f"File not found: {img_path}")  
             raise FileNotFoundError(f"File not found: {img_path}")
 
         image = Image.open(img_path).convert('RGB')  # Convert image to RGB
@@ -40,13 +39,12 @@ class CustomDataset(Dataset):
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
 # Load dataset
 dataset = CustomDataset(
-    csv_file='labels.xlsx',  # Ensure this is the correct path to your labels file
-    root_dir='visionline/',  # Change this to your actual dataset directory
+    csv_file='labels.xlsx',  
+    root_dir='visionline/',  
     transform=transform
 )
 data_loader = DataLoader(dataset, batch_size=32, shuffle=True)
@@ -117,7 +115,9 @@ def ResNet18():
     return ResNet(BasicBlock, [2, 2, 2, 2])
 
 # Define device
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+print(device)
+#device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 model = ResNet18().to(device)
 criterion = nn.CrossEntropyLoss()
@@ -127,6 +127,10 @@ optimizer = optim.Adam(model.parameters(), lr=0.001)
 num_epochs = 10
 
 for epoch in range(num_epochs):
+    total_correct = 0
+    total_samples = 0
+    running_loss = 0.0
+    
     for images, labels in data_loader:
         images = images.to(device)
         labels = labels.to(device)
@@ -140,6 +144,14 @@ for epoch in range(num_epochs):
         loss.backward()
         optimizer.step()
 
-    print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {loss.item():.4f}')
+        running_loss += loss.item() * images.size(0)
+        _, predicted = torch.max(outputs, 1)
+        total_samples += labels.size(0)
+        total_correct += (predicted == labels).sum().item()
+    
+    epoch_loss = running_loss / total_samples
+    epoch_accuracy = total_correct / total_samples
+    
+    print(f'Epoch [{epoch+1}/{num_epochs}], Loss: {epoch_loss:.4f}, Accuracy: {epoch_accuracy:.4f}')
 
 print('Training finished.')
