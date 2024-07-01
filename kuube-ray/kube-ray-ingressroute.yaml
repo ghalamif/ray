@@ -1,0 +1,18 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: kube-ray
+  namespace: kube-ray
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`bread.faps.uni-erlangen.de`) && PathPrefix(`/farzan`)   
+      services:
+        - name: raycluster-kuberay-head-svc
+          namespace: kube-ray
+          port: 8265
+  tls:
+    secretName: selfsigned-tls-secret-argocd-test
+        
