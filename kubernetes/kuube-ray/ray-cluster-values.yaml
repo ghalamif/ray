@@ -6,8 +6,8 @@
 # in this Helm chart.
 
 image:
-  repository: rayproject/ray
-  tag: 2.9.0
+  repository: rayproject/ray-ml
+  tag: nightly-py311-gpu
   pullPolicy: IfNotPresent
 
 nameOverride: "kuberay"
@@ -30,32 +30,32 @@ head:
   # If enableInTreeAutoscaling is true, the autoscaler sidecar will be added to the Ray head pod.
   # Ray autoscaler integration is supported only for Ray versions >= 1.11.0
   # Ray autoscaler integration is Beta with KubeRay >= 0.3.0 and Ray >= 2.0.0.
-  # enableInTreeAutoscaling: true
+  enableInTreeAutoscaling: true
   # autoscalerOptions is an OPTIONAL field specifying configuration overrides for the Ray autoscaler.
   # The example configuration shown below represents the DEFAULT values.
-  # autoscalerOptions:
-    # upscalingMode: Default
+  autoscalerOptions:
+    upscalingMode: Default
     # idleTimeoutSeconds is the number of seconds to wait before scaling down a worker pod which is not using Ray resources.
-    # idleTimeoutSeconds: 60
+    idleTimeoutSeconds: 60
     # imagePullPolicy optionally overrides the autoscaler container's default image pull policy (IfNotPresent).
-    # imagePullPolicy: IfNotPresent
+    imagePullPolicy: IfNotPresent
     # Optionally specify the autoscaler container's securityContext.
-    # securityContext: {}
-    # env: []
-    # envFrom: []
+    securityContext: {}
+    env: []
+    envFrom: []
     # resources specifies optional resource request and limit overrides for the autoscaler container.
     # For large Ray clusters, we recommend monitoring container resource usage to determine if overriding the defaults is required.
-    # resources:
-    #   limits:
-    #     cpu: "500m"
-    #     memory: "512Mi"
-    #   requests:
-    #     cpu: "500m"
-    #     memory: "512Mi"
+    resources:
+      limits:
+        cpu: "500m"
+        memory: "512Mi"
+      requests:
+        cpu: "500m"
+        memory: "512Mi"
   labels: {}
   # Note: From KubeRay v0.6.0, users need to create the ServiceAccount by themselves if they specify the `serviceAccountName`
   # in the headGroupSpec. See https://github.com/ray-project/kuberay/pull/1128 for more details.
-  serviceAccountName: ""
+  serviceAccountName: "kuberay-service-account"
   rayStartParams:
     dashboard-host: '0.0.0.0'
   # containerEnv specifies environment variables for the Ray container,
@@ -108,22 +108,22 @@ head:
   args: []
   # Optional, for the user to provide any additional fields to the service.
   # See https://pkg.go.dev/k8s.io/Kubernetes/pkg/api/v1#Service
-  headService: {}
-    # metadata:
-    #   annotations:
-    #     prometheus.io/scrape: "true"
-
+  headService: 
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+  
 
 worker:
   # If you want to disable the default workergroup
   # uncomment the line below
   # disabled: true
   groupName: workergroup
-  replicas: 2
+  replicas: 1
   minReplicas: 1
-  maxReplicas: 5
+  maxReplicas: 11
   labels: {}
-  serviceAccountName: ""
+  serviceAccountName: "kuberay-service-account"
   rayStartParams: {}
   # containerEnv specifies environment variables for the Ray container,
   # Follows standard K8s container env schema.

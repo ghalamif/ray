@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ray-actor-job
+  namespace: kube-ray
+spec:
+  template:
+    spec:
+      runtimeEnvYAML: |
+        pip:
+          - torch
+          - PIL
+          - pandas
+          - numpy
+          - ray[default]
+        env_vars:
+          KEY: "VALUE"
+      containers:
+      - name: ray-actor
+        image: your-docker-repo/your-actor-image:latest
+        command: ["python", "train.py"]
+      restartPolicy: Never

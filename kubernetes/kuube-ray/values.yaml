@@ -1,0 +1,95 @@
+# Default values for ray-cluster.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+image:
+  repository: rayproject/ray-ml
+  tag: nightly-py39-gpu
+  pullPolicy: IfNotPresent
+
+nameOverride: "kuberay"
+fullnameOverride: ""
+
+imagePullSecrets: []
+  # - name: an-existing-secret
+
+# common defined values shared between the head and worker
+common:
+  containerEnv: {}
+
+head:
+  enableInTreeAutoscaling: true
+  rayStartParams:
+    dashboard-host: '0.0.0.0'
+  resources:
+    limits:
+      cpu: "1"
+      memory: "2G"
+    requests:
+      cpu: "1"
+      memory: "2G"
+  volumes:
+    - name: log-volume
+      emptyDir: {}
+    - name: nfs-volume
+      persistentVolumeClaim:
+        claimName: nfs-pvc
+  volumeMounts:
+    - mountPath: /tmp/ray
+      name: log-volume
+    - mountPath: /mnt/nfs
+      name: nfs-volume
+
+worker:
+  groupName: workergroup
+  replicas: 2
+  minReplicas: 1
+  maxReplicas: 17
+  rayStartParams: {}
+  resources:
+    limits:
+      cpu: "1"
+      memory: "1G"
+      nvidia.com/gpu: 1
+    requests:
+      cpu: "1"
+      memory: "1G"
+      nvidia.com.gpu: 1
+  volumes:
+    - name: log-volume
+      emptyDir: {}
+    - name: nfs-volume
+      persistentVolumeClaim:
+        claimName: nfs-pvc
+  volumeMounts:
+    - mountPath: /tmp/ray
+      name: log-volume
+    - mountPath: /mnt/nfs
+      name: nfs-volume
+
+# Additional worker groups (if needed)
+additionalWorkerGroups:
+  smallGroup:
+    disabled: true
+    replicas: 0
+    minReplicas: 0
+    maxReplicas: 17
+    rayStartParams: {}
+    resources:
+      limits:
+        cpu: 1
+        memory: "1G"
+      requests:
+        cpu: 1
+        memory: "1G"
+    volumes:
+      - name: log-volume
+        emptyDir: {}
+      - name: nfs-volume
+        persistentVolumeClaim:
+          claimName: nfs-pvc
+    volumeMounts:
+      - mountPath: /tmp/ray
+        name: log-volume
+      - mountPath: /mnt/nfs
+        name: nfs-volume
