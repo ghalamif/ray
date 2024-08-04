@@ -53,7 +53,7 @@ install_nvidia_device_plugin() {
 }
 
 
-namespace_exists() {
+create_namespace() {
     # Check if the namespace already exists and create it if it doesn't
     if kubectl get namespace $namespace &> /dev/null; then
         echo "Namespace $namespace already exists. Skipping."
@@ -65,7 +65,7 @@ namespace_exists() {
 
 create_kube_ray_operator() {
     # Check if the namespace already exists and create it if it doesn't
-    namespace_exists
+    create_namespace
 
     # Check if the service account already exists and create it if it doesn't
     if kubectl get serviceaccount $service_account -n $namespace &> /dev/null; then
@@ -82,7 +82,7 @@ create_kube_ray_operator() {
 
 create_ray_cluster() {
     # Check if the namespace already exists and create it if it doesn't
-    namespace_exists
+    create_namespace
 
     if helm list -n $namespace | grep -q ray-cluster; then
         echo "Ray cluster already exists. Upgrading."
