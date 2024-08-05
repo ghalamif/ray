@@ -2,6 +2,7 @@ import pandas as pd
 import os
 from PIL import Image
 from torch.utils.data import Dataset
+import ray
 
 class CustomDataset(Dataset):
     def __init__(self, csv_file, root_dir, transform=None):
@@ -11,6 +12,9 @@ class CustomDataset(Dataset):
 
     def __len__(self):
         return len(self.annotations)
+    
+    def test(self, index):
+         return self.annotations.iloc[index, 0]
 
     def __getitem__(self, index):
         img_name = self.annotations.iloc[index, 0]
@@ -29,3 +33,10 @@ class CustomDataset(Dataset):
             image = self.transform(image)
 
         return image, y_label
+    
+
+df = CustomDataset(csv_file= os.path.abspath('labels.xlsx'), root_dir= os.path.abspath('visionline/'), transform=None)
+print(df.__getitem__(0))
+print(df.__len__())
+print(df.test(0))
+
