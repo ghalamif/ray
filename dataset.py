@@ -40,3 +40,11 @@ print(df.__getitem__(0))
 print(df.__len__())
 print(df.test(0))
 
+
+ds=ray.data.read_csv('/srv/nfs/kube-ray/labels.csv')
+print(ds.schema())
+print(ds)
+
+ds = ray.data.read_images('/srv/nfs/kube-ray/visionline/')
+print(ds.schema())
+print(ds)
